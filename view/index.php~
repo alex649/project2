@@ -16,26 +16,14 @@ Project 2 sampling by Alain Ibrahim
         </style>
 	<?php
 
-		/*
-		require_once('../model/model.php');
+	    require_once('../model/model.php');
 
-    		$data = getStationNames();
+    	    $error = write_station_info_to_db();
 
-		$name = "Alex";
-
-		echo json_encode(array("result" => $name));
-
-    		// json_encode($data);
-		*/
-
-		require_once('../model/model.php');
-
-    		$error = write_station_info_to_db();
-
-    		if ($error != false)
-    		{
-		    print $error;
-    		}
+    	    if ($error != false)
+    	    {
+		print $error;
+    	    }
 
 	?>    
 	<script type="text/javascript" 
@@ -52,7 +40,7 @@ Project 2 sampling by Alain Ibrahim
             // draw menu
             function initialize() {
 
-		// clear the former content of a given <div id="some_div"></div>
+		// clear the former content of a given div
 		document.getElementById('menu').innerHTML = '';
 
                 var mapOptions = {
@@ -62,9 +50,6 @@ Project 2 sampling by Alain Ibrahim
                 };
                 map = new google.maps.Map(document.getElementById("map_canvas"),
                 mapOptions);
-
-		// clear the former content of a given <div id="some_div"></div>
-		// document.getElementById('some_div').innerHTML = '';
             }
       
             function addMarker() {
@@ -104,28 +89,15 @@ Project 2 sampling by Alain Ibrahim
                 });
             }
 
-	    /*
-	    function useJQuery() {
-                $.ajax({
-                    type: 'POST',
-        	    url: "ajax.php",
-		    data: { get_stations_names:'yes' },
-		    dataType: "json",
-                    success: function (result) { alert(result[0]); stations = result.result; alert(stations[0]); },
-                });
-	    }
-	    */
-
 	    function useJQuery() {
     		$.ajax({
         	    type: 'POST',
         	    url: "ajax.php",
         	    data: { post_made:'yes' },
-        	    success: function (response) { // alert(response);
+        	    success: function (response) {
 						     stations = response;
 						     stations = stations.replace(/[\[\]\\\""]+/g, '');
 						     stations = stations.split(',');
-						     // alert(stations);
 
 						     for (var x in stations) {
 

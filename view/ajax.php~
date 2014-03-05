@@ -28,7 +28,7 @@ if ($_POST["post_made"])
     }
     */
 
-    print $data;
+    print json_encode($data);
 
 }  
 ?>
