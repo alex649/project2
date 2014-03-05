@@ -16,10 +16,10 @@ if (isset($_GET["page"]))
 }
 else
 {
-    $page = "index";
+    $page = "index.php";
 }
 
-$path = __DIR__ . '/../controller/' . $page . '.php';
+$path = __DIR__ . '/../controller/' . $page;
 
 if (file_exists($path))
 {

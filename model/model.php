@@ -54,6 +54,53 @@ function get_quote_data($symbol)
 }
 
 /*
+ * getStationNames() - get station names from database
+ *
+ * @return array $names
+ *
+ */
+function getStationNames() 
+{
+    global $pdo;
+    
+    $error = false;
+    $names = array();
+
+    try
+    {
+        // connect to database
+        $pdo = connect_to_database();
+    }
+    catch (Exception $e)
+    {
+        $error = "Could not connect to database.";
+	return;
+    }
+
+    try
+    {
+	$query = sprintf("SELECT name FROM stations WHERE state='CA'");
+        $results = $pdo->query($query);
+
+	$i = 0;
+	// get user id
+        foreach ($results as $result)
+        {
+	    $names[$i] = $result['name'];
+
+	    $i++;
+        }
+    }
+    catch (Exception $e)
+    {
+	$error = "Could not query table 'stations'.";
+	return $error;
+    }
+
+    return $names;
+}
+
+/*
  * write_station_info_to_db() - write station information for caching to database
  *
  */
