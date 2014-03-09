@@ -54,17 +54,17 @@ function get_quote_data($symbol)
 }
 
 /*
- * getStationNames() - get station names from database
+ * getStationNames() - get station names and coordinates from database
  *
- * @return array $names
+ * @return array $data
  *
  */
-function getStationNames() 
+function getStationData() 
 {
     global $pdo;
     
     $error = false;
-    $names = array();
+    $data = array();
 
     try
     {
@@ -79,14 +79,16 @@ function getStationNames()
 
     try
     {
-	$query = sprintf("SELECT name FROM stations WHERE state='CA'");
+	$query = sprintf("SELECT * FROM stations WHERE state='CA'");
         $results = $pdo->query($query);
 
 	$i = 0;
 	// get user id
         foreach ($results as $result)
         {
-	    $names[$i] = $result['name'];
+	    $data[$i] = $result['name'] . "," . $result['abbreviation']. "," . $result['latitude'] 
+		. "," .$result['longitude'] . "," . $result['address'] . "," . $result['city']
+		    . "," . $result['state'] . "," . $result['zipcode'];
 
 	    $i++;
         }
@@ -97,7 +99,7 @@ function getStationNames()
 	return $error;
     }
 
-    return $names;
+    return $data;
 }
 
 /*
@@ -131,6 +133,7 @@ function write_station_info_to_db()
 	{
 	    $query = sprintf("CREATE TABLE stations (
 			        name VARCHAR(30) NOT NULL,
+				abbreviation CHAR(4) NOT NULL,
 				latitude FLOAT(11,8) NOT NULL,
 				longitude FLOAT(11,8) NOT NULL,
 				address VARCHAR(30) NOT NULL,
@@ -147,6 +150,7 @@ function write_station_info_to_db()
             foreach ($xml->xpath("/root/stations/station") as $station)
             {
 		$name = $station->name;
+		$abbr = $station->abbr;
 		$latitude = $station->gtfs_latitude;
 		$longitude = $station->gtfs_longitude;
 		$address = $station->address;
@@ -156,8 +160,10 @@ function write_station_info_to_db()
 
 		try
         	{
-            	    $query = sprintf("INSERT INTO stations (`name`, `latitude`, `longitude`, `address`, `city`, `state`, `zipcode`) 
-			VALUES ('$name', '$latitude', '$longitude', '$address', '$city', '$state', '$zipcode')");
+            	    $query = sprintf("INSERT INTO stations (`name`, `abbreviation`, `latitude`, 
+			`longitude`, `address`, `city`, `state`, `zipcode`) 
+			    VALUES ('$name', '$abbr', '$latitude', '$longitude', '$address', 
+			        '$city', '$state', '$zipcode')");
             	    $results = $pdo->query($query);
         	}
         	catch (Exception $e)

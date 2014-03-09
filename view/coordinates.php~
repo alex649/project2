@@ -1,33 +1,24 @@
 <?php
 
 /**
- * ajax.php
+ * coordinates.php
  * 
  * by Alex Spivakovsky
 */
 
 require_once('../model/model.php');
 
-if (isset($_POST["station_names"]))
-{
-    $data = getStationData();
-
-    print json_encode($data);
-}
-
-/*
 if (isset($_POST["get_coordinates"]))
 {
     // $data = getStationCoordinates($_POST["get_coordinates"]);
 
     $data = $_POST["get_coordinates"];
 
-    print json_decode($data, true);
+    print json_decode($data);
 
-    print "station1 : ". $data["station1"]; 
+    //print "station1 : ". $data["station1"]; 
 
     // print json_encode($data);
-}
-*/  
+}  
 
 ?>

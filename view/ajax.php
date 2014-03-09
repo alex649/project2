@@ -1,25 +1,18 @@
 <?php
 
 /**
- * ajax.html
+ * ajax.php
  * 
  * by Alex Spivakovsky
 */
 
 require_once('../model/model.php');
 
-if ($_POST["post_made"])
+if (isset($_POST["station_names"]))
 {
-    $data = getStationNames();
-
-    /*
-    foreach ($data as $result)
-    {
-        print $result;
-    }
-    */
+    $data = getStationData();
 
     print json_encode($data);
+} 
 
-}  
 ?>

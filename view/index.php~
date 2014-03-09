@@ -1,6 +1,6 @@
 <!-- 
 index.html
-Project 2 sampling by Alain Ibrahim 
+by Alex Spivakovsky 
 -->
 
 <!DOCTYPE html>
@@ -55,7 +55,8 @@ Project 2 sampling by Alain Ibrahim
             function addMarker() {
                 marker = new google.maps.Marker({
                 position: new google.maps.LatLng(37.775362, -122.417564),
-                title: "I am a marker!"
+                title: "I am a marker!",
+		cursor: "String"
             });
           
                 marker.setMap(map);
@@ -86,20 +87,27 @@ Project 2 sampling by Alain Ibrahim
         
                 google.maps.event.addListener(marker, 'click', function() {
                     infowindow.open(map,marker);
+		    alert(marker.cursor);
                 });
             }
 
-	    function useJQuery() {
+	    function getStationNames() {
     		$.ajax({
         	    type: 'POST',
         	    url: "ajax.php",
-        	    data: { post_made:'yes' },
+        	    data: { station_names:'yes' },
         	    success: function (response) {
-						     stations = response;
-						     stations = stations.replace(/[\[\]\\\""]+/g, '');
+						     stations = response; 
+						     stations = stations.replace(/[\[\]\\\""{}]+/g, '');
 						     stations = stations.split(',');
 
-						     for (var x in stations) {
+						     //var x = 0;
+						     for (var x = 0; x < stations.length;) {
+
+							 if ((x!=0) && (x%3!=0)) {
+							     x++;
+							     continue;
+							 }
 
 						         // create the necessary element
 	    					         var label= document.createElement("label");
@@ -117,20 +125,53 @@ Project 2 sampling by Alain Ibrahim
 
 	    					         // add the label element to your div
 	    					         document.getElementById('menu').appendChild(label);
+
+							 x++;
 						     }
 						 },
     	        });
 	    }
-  
+
+	    function onSubmit() {
+		var checked = new Array();
+		var i = 0;
+		$("input").each(function () {
+		    if ($(this).is(':checked')) {
+			checked[i] = this.name;
+			i++;
+		    }
+	        });
+
+		if ((checked.length > 2) || (checked.length < 2)) {
+		    alert("Please select exactly 2 stations for a drawing of an itinerary.");
+
+		    return;
+		}
+
+		drawItinerary(checked[0], checked[1]);
+	    }
+
+	    function drawItinerary(station1, station2) {
+		var stats = station1 + "," + station2;
+		$.ajax({
+        	    type: 'POST',
+        	    url: "coordinates.php",
+        	    data: { get_coordinates:stats },
+        	    success: function (coordinates) {
+			alert(coordinates);
+		    },
+	        });
+	    }
+
         </script>
     </head>
-    <body onload="initialize();addPolyline();addMarker();addInfoWindow();useJQuery();">
+    <body onload="initialize();addPolyline();addMarker();addInfoWindow();getStationNames();" onsubmit="onSubmit();">
 	<h1 align=center>Sun Francisco Bay Transit Map</h1>
         <div id="map_canvas" style="width:60%; height:80%"></div>
 	<div id="menu"></div>
 	<br>
 	<br>
-	<div align=center>
+	<div align=center onclick="onSubmit();">
 	    <input type=submit name=submit value="Draw Itinerary">
 	</div>
 	<br>
