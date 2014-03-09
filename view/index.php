@@ -52,14 +52,33 @@ by Alex Spivakovsky
                 mapOptions);
             }
       
-            function addMarker() {
-                marker = new google.maps.Marker({
-                position: new google.maps.LatLng(37.775362, -122.417564),
-                title: "I am a marker!",
-		cursor: "String"
-            });
-          
-                marker.setMap(map);
+            function addMarkers(stations) {
+		var number_of_markers = stations.length/8;
+		var station_name = "";
+		var station_abbr = "";
+		var latitude = 0;
+		var longitude = 0;
+		
+		for (var index = 0; index < stations.length; index++) {
+		    
+		    station_name = stations[index];
+		    station_abbr = stations[++index];
+		    latitude = parseFloat(stations[++index]);
+		    longitude = parseFloat(stations[++index]);
+
+                    marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(latitude, longitude),
+		        title: station_name,
+		        cursor: station_abbr
+            	    });
+
+          	    marker.setMap(map);
+		    /*
+		    addInfoWindow(marker);
+		    */
+		    index = index + 5;
+		    break;
+		}
             }
       
             function addPolyline() {
@@ -79,10 +98,10 @@ by Alex Spivakovsky
                 polylinePath.setMap(map);
             }
     
-            function addInfoWindow() {
+            function addInfoWindow(marker) {
                 var infowindow = new google.maps.InfoWindow({
                     content: "<h1 style='color:blue'>I am an info window!</h1>",
-                    position: new google.maps.LatLng(37.7805, -122.4725), 
+                    position: new google.maps.LatLng(marker.getPosition().lat(), marker.getPosition().lng()), 
                 });
         
                 google.maps.event.addListener(marker, 'click', function() {
@@ -91,7 +110,7 @@ by Alex Spivakovsky
                 });
             }
 
-	    function getStationNames() {
+	    function getStationInfo() {
     		$.ajax({
         	    type: 'POST',
         	    url: "ajax.php",
@@ -101,11 +120,12 @@ by Alex Spivakovsky
 						     stations = stations.replace(/[\[\]\\\""{}]+/g, '');
 						     stations = stations.split(',');
 
-						     //var x = 0;
+						     addMarkers(stations);
+
 						     for (var x = 0; x < stations.length;) {
 
 							 if ((x!=0) && (x%8!=0)) {
-							     x++;
+							     x = x + 7;
 							     continue;
 							 }
 
@@ -127,8 +147,8 @@ by Alex Spivakovsky
 	    					         document.getElementById('menu').appendChild(label);
 
 							 x++;
-						     }
-						 },
+						      }
+						  },
     	        });
 	    }
 
@@ -152,20 +172,12 @@ by Alex Spivakovsky
 	    }
 
 	    function drawItinerary(station1, station2) {
-		var stats = station1 + "," + station2;
-		$.ajax({
-        	    type: 'POST',
-        	    url: "coordinates.php",
-        	    data: { get_coordinates:stats },
-        	    success: function (coordinates) {
-			alert(coordinates);
-		    },
-	        });
+		alert(station1 + station2);
 	    }
 
         </script>
     </head>
-    <body onload="initialize();addPolyline();addMarker();addInfoWindow();getStationNames();" onsubmit="onSubmit();">
+    <body onload="initialize();getStationInfo();addPolyline();" onsubmit="onSubmit();">
 	<h1 align=center>Sun Francisco Bay Transit Map</h1>
         <div id="map_canvas" style="width:60%; height:80%"></div>
 	<div id="menu"></div>
