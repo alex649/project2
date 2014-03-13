@@ -54,7 +54,47 @@ function get_quote_data($symbol)
 }
 
 /*
- * getStationNames() - get station names and coordinates from database
+ * getTimes() - get departure and arrival times from url
+ * 
+ * @return array $data
+ *
+ */
+function getTimes($abbr) 
+{
+    $data = array();
+    $i = 0;
+
+    $url = 'http://api.bart.gov/api/etd.aspx?cmd=etd&orig=' . $abbr . '&key=MW9S-E7SL-26DU-VV8V';
+    $xml = simplexml_load_file($url);
+
+    foreach ($xml->xpath("/root/station/etd") as $etd)
+    {
+	$data[$i++] = "Destination: " . $etd->destination . "<br>";
+
+	if (isset($etd->estimate[0]->minutes))
+	{
+	    $data[$i++] = " Minutes: " . $etd->estimate[0]->minutes;
+	    $data[$i++] = " Platform: " . $etd->estimate[0]->platform . "<br>";
+	}
+	
+	if (isset($etd->estimate[1]->minutes))
+	{
+	    $data[$i++] = " Minutes: " . $etd->estimate[1]->minutes;
+	    $data[$i++] = " Platform: " . $etd->estimate[1]->platform . "<br>";
+	}
+
+	if (isset($etd->estimate[2]->minutes))
+	{
+	    $data[$i++] = " Minutes: " . $etd->estimate[2]->minutes;
+	    $data[$i++] = " Platform: " . $etd->estimate[2]->platform . "<br>" . "<br>";
+	}
+    }
+
+    return $data;
+}
+
+/*
+ * getStationData() - get station names and coordinates from database
  *
  * @return array $data
  *
@@ -79,14 +119,16 @@ function getStationData()
 
     try
     {
-	$query = sprintf("SELECT name, latitude, longitude FROM stations WHERE state='CA'");
+	$query = sprintf("SELECT * FROM stations WHERE state='CA'");
         $results = $pdo->query($query);
 
 	$i = 0;
 	// get user id
         foreach ($results as $result)
         {
-	    $data[$i] = $result['name'] . "," .$result['latitude'] . "," .$result['longitude'];
+	    $data[$i] = $result['name'] . "," . $result['abbreviation']. "," . $result['latitude'] 
+		. "," .$result['longitude'] . "," . $result['address'] . "," . $result['city']
+		    . "," . $result['state'] . "," . $result['zipcode'];
 
 	    $i++;
         }

@@ -73,20 +73,50 @@ by Alex Spivakovsky
             	    });
 
           	    marker.setMap(map);
-		    /*
+
 		    addInfoWindow(marker);
-		    */
-		    index = index + 5;
-		    break;
+
+		    index = index + 4;
 		}
             }
+
       
-            function addPolyline() {
-                var polylineCoordinates = [
-                    new google.maps.LatLng(37.775362, -122.417564),
-                    new google.maps.LatLng(37.7849, -122.4522),
-                    new google.maps.LatLng(37.7805, -122.4725),
-                ];
+            function addPolylines(departing, destination) {
+		var polylines = new Array();		
+		var addPolyline = false;
+		var j = 0;
+
+		for (var i = 0; i < stations.length; i++) {
+
+		    if (departing == stations[i]) {
+			addPolyline = true;
+		    }
+
+		    if (destination == stations[i]) {
+			addPolyline = false;
+			i = i + 2;
+			polylines[j++] = stations[i];
+			polylines[j] = stations[++i];
+			
+			break;
+		    }
+
+		    if (addPolyline == true) {
+			i = i + 2;
+			polylines[j++] = stations[i];
+			polylines[j++] = stations[++i];
+			i = i+4;
+		    }
+		}
+		
+                var polylineCoordinates = new Array();
+
+		var m = 0;
+		for (var k = 0; k <= j; k++) {
+                    polylineCoordinates[m] = new google.maps.LatLng(polylines[k], polylines[++k]);
+
+		    m++;
+		}	
             
                 var polylinePath = new google.maps.Polyline({
                     path: polylineCoordinates,
@@ -99,15 +129,27 @@ by Alex Spivakovsky
             }
     
             function addInfoWindow(marker) {
-                var infowindow = new google.maps.InfoWindow({
-                    content: "<h1 style='color:blue'>I am an info window!</h1>",
-                    position: new google.maps.LatLng(marker.getPosition().lat(), marker.getPosition().lng()), 
-                });
-        
-                google.maps.event.addListener(marker, 'click', function() {
-                    infowindow.open(map,marker);
-		    alert(marker.cursor);
-                });
+		 var station_info = new Array();
+		$.ajax({
+        	    type: 'POST',
+        	    url: "times.php",
+        	    data: { times: marker.cursor },
+        	    success: function (response) { station_info = response;
+						   station_info = station_info.replace(/[\[\]\\\""{}\,]+/g, '');
+						   // station_info = station_info.split(',');
+						   // var station = station_info.replace(',', "");
+
+						   var infowindow = new google.maps.InfoWindow({
+                    				   content: station_info,
+                    				   position: new google.maps.LatLng(marker.getPosition().lat(), marker.getPosition().lng()), 
+                				   });
+
+                				   google.maps.event.addListener(marker, 'click', function() {
+                    				   infowindow.open(map,marker);
+                				   }); 
+						 }
+		});
+		
             }
 
 	    function getStationInfo() {
@@ -168,16 +210,12 @@ by Alex Spivakovsky
 		    return;
 		}
 
-		drawItinerary(checked[0], checked[1]);
-	    }
-
-	    function drawItinerary(station1, station2) {
-		alert(station1 + station2);
+		addPolylines(checked[0], checked[1]);
 	    }
 
         </script>
     </head>
-    <body onload="initialize();getStationInfo();addPolyline();">
+    <body onload="initialize();getStationInfo();addPolylines();" onsubmit="onSubmit();">
 	<h1 align=center>Sun Francisco Bay Transit Map</h1>
         <div id="map_canvas" style="width:60%; height:80%"></div>
 	<div id="menu"></div>
